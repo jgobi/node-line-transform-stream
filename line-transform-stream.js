@@ -21,7 +21,7 @@ const Transform = require( 'stream' ).Transform
 // extend Transform stream class
 class LineTransformStream extends Transform
 {
-    constructor( transformCallback, stringEncoding='utf8' )
+    constructor( transformCallback, { stringEncoding='utf8', automaticNewline=true } = {} )
     {
         // fail if callback is not a function
         if ( typeof transformCallback != 'function' )
@@ -38,6 +38,9 @@ class LineTransformStream extends Transform
 
         // set string encoding
         this.stringEncoding = stringEncoding
+
+        // set automatic newline
+        this.automaticNewline = automaticNewline
 
         // initialize internal line buffer
         this.lineBuffer = ''
@@ -67,8 +70,9 @@ class LineTransformStream extends Transform
         {
             try
             {
-                // pass line to callback, transform it and add line-break back
-                output += this.transformCallback( line ) + '\n'
+                // pass line to callback, transform it and add line-break in need
+                output += this.transformCallback( line )
+                if (this.automaticNewline) output += '\n'
             }
             catch ( error )
             {
